@@ -74,6 +74,21 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
+
+        currentPos = successorGameState.getPacmanPosition()
+        ghostStates = currentGameState.getGhostStates()
+
+        #abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+
+        #we want the ghost not to be near the pac-man
+        newX, newY = newPos
+        #newGhostX, newGhostY = newGhostStates[0]
+        print(newGhostStates)
+        m = abs(newX - newGhostX) + abs(newY - newGhostY)
+        print(m)
+        
+        return m
+
         return successorGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState):
