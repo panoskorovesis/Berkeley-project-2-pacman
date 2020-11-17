@@ -75,21 +75,77 @@ class ReflexAgent(Agent):
 
         "*** YOUR CODE HERE ***"
 
+        score = 0
+
         currentPos = successorGameState.getPacmanPosition()
         ghostStates = currentGameState.getGhostStates()
+        currentFood = currentGameState.getFood()
+        currentGhostStates = currentGameState.getGhostStates()
+        ScaredTimes = [ghostState.scaredTimer for ghostState in currentGhostStates]
+        newFoodNum = len(newFood.asList())
+        curFoodNum = len(currentFood.asList())
 
-        #abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+        #calculate pos to nearest food
+        curFoodDist = []
+        for food in currentFood.asList():
+            curFoodDist.append(manhattanDistance(currentPos, food))
+        #select the min
+        minFoodDist = min(curFoodDist)
 
-        #we want the ghost not to be near the pac-man
-        newX, newY = newPos
-        #newGhostX, newGhostY = newGhostStates[0]
-        print(newGhostStates)
-        m = abs(newX - newGhostX) + abs(newY - newGhostY)
-        print(m)
-        
-        return m
+        #do the same for newPos
+        newFoodDist = []
+        for food in newFood.asList():
+            newFoodDist.append(manhattanDistance(newPos, food))
+        #select the min
+        minNewFoodDist = min(curFoodDist)
 
-        return successorGameState.getScore()
+        #if is gonna eat add the score
+        if(newFoodNum < curFoodNum):
+            score += 200
+        #if you get closer to a food add score
+        else:
+            if(minNewFoodDist < minFoodDist):
+                score += minNewFoodDist * 10
+            else:
+                score -= minNewFoodDist * 30
+
+        #calculate current disctance from the nearest ghost
+        curGhostDist = []
+        for ghost in currentGhostStates:
+            curGhostDist.append(manhattanDistance(currentPos, ghost.getPosition()))
+
+        minDist = min(curGhostDist)
+
+        #do it again for newpos
+        newGhostDist = []
+        for ghost in newGhostStates:
+            newGhostDist.append(manhattanDistance(newPos, ghost.getPosition()))
+
+        minNewDist = min(curGhostDist)
+
+        #if the ghosts are scared in the current position
+        #prefer the closest distance
+        if(sum(ScaredTimes) > 0):
+            if(minNewDist < minDist):
+                score += (minDist - minNewDist) * 20
+        #if you are going to get closer remove score
+        else:
+            #this is a lose state so return very low score
+            if(minNewDist <= 1):
+                score = -10000
+            #if the new dist is very close to a ghost remove points
+            elif(minNewDist <= 10):
+                score -= minNewDist * (minDist - minNewDist)
+
+        #penalty for stop
+        if action == Directions.STOP:
+            score -= 100
+
+        #add score if you are gonna eat a capsule
+        if(newPos in successorGameState.getCapsules()):
+            score += 200
+
+        return score
 
 def scoreEvaluationFunction(currentGameState):
     """
