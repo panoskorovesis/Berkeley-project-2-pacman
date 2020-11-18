@@ -206,7 +206,74 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        #following pseudocode found in the wiki
+        def minMaxSearch(agent, depth, gameState):
+
+            #if we have finished if its win or lose or we have reached the max depth
+            if(gameState.isWin() == True) or (gameState.isLose() == True) or (depth == self.depth):
+                #return the score of thr current state
+                return [self.evaluationFunction(gameState)]
+
+            #if we are at the last ghost change to pacman and add depth
+            if(agent == gameState.getNumAgents() - 1):
+                newAgent = 0
+                depth += 1
+
+            #if there are more ghosts go to the next one
+            else:
+                newAgent = agent + 1
+            
+            #if its the pacman agent
+            #use the max score
+            if(agent == 0):
+                #to find the max score
+                maxScore = -1000000
+                maxMove = None
+                #check the legal moves and find the best score, the best move
+                for action in gameState.getLegalActions(agent):
+                    #get the gamestate of the action
+                    actionGameState = gameState.generateSuccessor(agent, action)
+                    #recursive function call
+                    #and get the score
+                    #use [1] cause the output is (move, score) and we need only the score
+                    score1 = minMaxSearch(newAgent, depth, actionGameState)[0]
+                    #find the max
+                    if(score1 >= maxScore):
+                        maxScore = score1
+                        #also add the maxMove
+                        maxMove = action
+
+                #return the two values found
+                return [maxScore, maxMove]
+
+            #if it's a ghost
+            #use the min score
+            else:
+                minScore = 1000000
+                minMove = None
+                #check the legal moves and find the best score, the best move
+                for action in gameState.getLegalActions(agent):
+                    #get the gamestate of the action
+                    actionGameState = gameState.generateSuccessor(agent, action)
+                    #recursive function call
+                    #and get the score
+                    #use [1] cause the output is (move, score) and we need only the score
+                    score2 = minMaxSearch(newAgent, depth, actionGameState)[0]
+                    #find the min
+                    if(score2 <= minScore):
+                        minScore = score2
+                        #also add the maxMove
+                        move = action
+
+                #return the two values found
+                return [minScore, move]
+
+        #use the function to find the best move
+        #start with pacman so agent is 0
+        #we starrt from depth 0
+        #1 is the position of the move
+        return minMaxSearch(0, 0, gameState)[1]
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
