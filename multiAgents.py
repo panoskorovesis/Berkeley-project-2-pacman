@@ -294,7 +294,100 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        #alpha-beta is extremly similiar with the min-max algorithm
+        #we follow the a similar logic
+        #we follow the lecture code
+
+        def minValueAlphaBeta(agent, gameState, depth, a, b):
+            #if it's a goal state return the evaluation score of the node
+            if(depth == self.depth * gameState.getNumAgents() or gameState.isLose() or gameState.isWin()):
+                return [self.evaluationFunction(gameState)]
+
+            #set variables for maxScore and maxMove
+            minScore = float("inf")
+            minMove = "None"
+            #get avaible actions
+            actions = gameState.getLegalActions(agent)
+            #for all the avaiable actions
+            for action in actions:
+                #get the successor
+                succ = gameState.generateSuccessor(agent, action)
+                #set the new agent
+                #if we havent reached the max, go to next ghost
+                #else to to pacman again
+                if(agent == gameState.getNumAgents() - 1):
+                    newAgent = 0
+                else:
+                    newAgent = agent + 1
+                score = alphaBetaSearch(newAgent, succ, depth + 1, a, b)[0]
+
+                if(score <= minScore):
+                    minScore = score
+                    minMove = action
+
+                #apply the alpha beta logic
+                if(minScore < a):
+                    return [minScore, minMove]
+
+                b = min(b, minScore)
+                
+            #return the max action along with the score
+            return [minScore, minMove]
+
+        def maxValueAlphaBeta(agent, gameState, depth, a, b):
+            #if it's a goal state return the evaluation score of the node
+            if(depth == self.depth * gameState.getNumAgents() or gameState.isLose() or gameState.isWin()):
+                return [self.evaluationFunction(gameState)]
+
+            #set variables for maxScore and maxMove
+            maxScore = -float("inf")
+            maxMove = "None"
+            #get avaible actions
+            actions = gameState.getLegalActions(agent)
+            #for all the avaiable actions
+            for action in actions:
+                #get the successor
+                succ = gameState.generateSuccessor(agent, action)
+                #set the new agent
+                #if we havent reached the max, go to next ghost
+                #else to to pacman again
+                if(agent == gameState.getNumAgents() - 1):
+                    newAgent = 0
+                else:
+                    newAgent = agent + 1
+
+                score = alphaBetaSearch(newAgent, succ, depth + 1, a, b)[0]
+
+                if(score >= maxScore):
+                    maxScore = score
+                    maxMove = action
+
+                #apply the alpha beta logic
+                if(maxScore > b):
+                    return [maxScore, maxMove]
+
+                a = max(a, maxScore)
+
+            #return the max action along with the score
+            return [maxScore, maxMove]
+
+        def alphaBetaSearch(agent, gameState, depth, a, b):
+
+             #if it's the pacman go for max
+            #return [1] as the score is in pos [0]
+            if(agent == 0):
+                return maxValueAlphaBeta(agent, gameState, depth, a, b)
+            #if it's the ghost go for the min
+            else:
+                return minValueAlphaBeta(agent, gameState, depth, a, b)
+
+        #we want the best move for pacman so we must do 
+        #set alpha, beta
+        alpha = -float("inf")
+        beta = float("inf")
+        return maxValueAlphaBeta(0, gameState, 0, alpha, beta)[1]
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
