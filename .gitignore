@@ -3,4 +3,4 @@
 __pycache*
 
 #vscode files
-.vscode
+.vs*
