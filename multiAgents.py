@@ -74,9 +74,9 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-
+        #to calculate the final score
         score = 0
-
+        #current gamestate data
         currentPos = successorGameState.getPacmanPosition()
         ghostStates = currentGameState.getGhostStates()
         currentFood = currentGameState.getFood()
@@ -210,6 +210,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
         #we are following the lecture code
         #and adjusting it to the pacman game
 
+        #we want the score and the cooresponding move
+        #the function returns [score, move]
         def maxValue(agent, gameState, depth):
             #if it's a goal state return the evaluation score of the node
             if(depth == self.depth * gameState.getNumAgents() or gameState.isLose() or gameState.isWin()):
@@ -231,6 +233,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     newAgent = 0
                 else:
                     newAgent = agent + 1
+                #call the master function
                 score = minMaxDecision(newAgent, succ, depth + 1)[0]
 
                 #keep the max score and move
@@ -262,6 +265,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     newAgent = 0
                 else:
                     newAgent = agent + 1
+                #call the master function
                 score = minMaxDecision(newAgent, succ, depth + 1)[0]
 
                 #keep the max score and move
@@ -320,6 +324,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     newAgent = 0
                 else:
                     newAgent = agent + 1
+                #call the master function
                 score = alphaBetaSearch(newAgent, succ, depth + 1, a, b)[0]
 
                 if(score <= minScore):
@@ -358,7 +363,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     newAgent = 0
                 else:
                     newAgent = agent + 1
-
+                #call the master function
                 score = alphaBetaSearch(newAgent, succ, depth + 1, a, b)[0]
 
                 if(score >= maxScore):
@@ -406,7 +411,91 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        #we are using the code from minMax question
+        #but the ghosts chose randomly one of the moves
+        #we need to change the minMax only for the ghost selection of score
+        #for that part we follow the wiki code
+
+        def maxValue(agent, gameState, depth):
+            #if it's a goal state return the evaluation score of the node
+            if(depth == self.depth * gameState.getNumAgents() or gameState.isLose() or gameState.isWin()):
+                return [self.evaluationFunction(gameState)]
+
+            #set variables for maxScore and maxMove
+            maxScore = -float("inf")
+            maxMove = "None"
+            #get avaible actions
+            actions = gameState.getLegalActions(agent)
+            #for all the avaiable actions
+            for action in actions:
+                #get the successor
+                succ = gameState.generateSuccessor(agent, action)
+                #set the new agent
+                #if we havent reached the max, go to next ghost
+                #else to to pacman again
+                if(agent == gameState.getNumAgents() - 1):
+                    newAgent = 0
+                else:
+                    newAgent = agent + 1
+                #call the master function
+                score = expectiMaxDecision(newAgent, succ, depth + 1)[0]
+
+                #keep the max score and move
+                if(score >= maxScore):
+                    maxScore = score
+                    maxMove = action
+
+            #return the max action along with the score
+            return [maxScore, maxMove]
+
+        #the ghosts go for the random
+        def  randomValue(agent, gameState, depth):
+            #if it's a goal state return the evaluation score of the node
+            if(depth == self.depth * gameState.getNumAgents() or gameState.isLose() or gameState.isWin()):
+                return [self.evaluationFunction(gameState)]
+            #set variables for randomScore and move
+            randScore = 0
+            randMove = "None"
+            #get avaible actions
+            actions = gameState.getLegalActions(agent)
+
+            #we want equal possibility for each action
+            p = 100 / len(actions)
+
+            #for all the avaiable actions
+            for action in actions:
+                #get the successor
+                succ = gameState.generateSuccessor(agent, action)
+                #set the new agent
+                #if we havent reached the max, go to next ghost
+                #else to to pacman again
+                if(agent == gameState.getNumAgents() - 1):
+                    newAgent = 0
+                else:
+                    newAgent = agent + 1
+                #call the master function
+                score = expectiMaxDecision(newAgent, succ, depth + 1)[0]
+
+                #calculate the average score
+                randScore += p * score
+
+            #return the max action along with the score
+            return [randScore]
+            
+
+        def expectiMaxDecision(agent, gameState, depth):
+
+            #if it's the pacman go for max
+            #return [1] as the score is in pos [0]
+            if(agent == 0):
+                return maxValue(agent, gameState, depth)
+            #if it's the ghost go for the min
+            else:
+                return randomValue(agent, gameState, depth)
+
+        #we want the best move for pacman so we must do 
+        return maxValue(0, gameState, 0)[1]
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -416,7 +505,6 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
 # Abbreviation
 better = betterEvaluationFunction
