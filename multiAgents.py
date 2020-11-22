@@ -326,6 +326,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     minScore = score
                     minMove = action
 
+                #all code above is the same as minMax
+
                 #apply the alpha beta logic
                 if(minScore < a):
                     return [minScore, minMove]
@@ -362,6 +364,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 if(score >= maxScore):
                     maxScore = score
                     maxMove = action
+
+                #all code above is the same as minMax
 
                 #apply the alpha beta logic
                 if(maxScore > b):
