@@ -132,7 +132,7 @@ class ReflexAgent(Agent):
         else:
             #this is a lose state so return very low score
             if(minNewDist <= 1):
-                score = -10000
+                score = -100000
             #if the new dist is very close to a ghost remove points
             elif(minNewDist <= 10):
                 score -= minNewDist * (minDist - minNewDist)
@@ -502,9 +502,89 @@ def betterEvaluationFunction(currentGameState):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: <return a score for each state based on some factors>
+    
+    factors:
+        distance to closest food    (40 %)
+        distance to closest ghost   (30 %)
+        distance to pelet           (30 %)
+
     """
     "*** YOUR CODE HERE ***"
+    #to calculate the final score
+    score = 0.0
+    foodScore = 0
+    ghostScore = 0
+    peletScore = 0
+    #current gamestate data
+    currentPos = currentGameState.getPacmanPosition()
+    ghostStates = currentGameState.getGhostStates()
+    currentFood = currentGameState.getFood()
+    currentGhostStates = currentGameState.getGhostStates()
+    ScaredTimes = [ghostState.scaredTimer for ghostState in currentGhostStates]
+    curFoodNum = len(currentFood.asList())
+    currentPelets = currentGameState.getCapsules()
+
+    if(currentGameState.isWin()):
+        return 1000000
+    elif(currentGameState.isLose()):
+        return -1000000
+
+    #assign score basted on food distance (the closer the better)
+
+    #calculate pos to nearest food
+    curFoodDist = []
+    for food in currentFood.asList():
+        curFoodDist.append(manhattanDistance(currentPos, food))
+    #select the min
+    minFoodDist = float(min(curFoodDist))
+
+    #multiplier
+    mult = 1.0 / minFoodDist * 100
+    #add score
+    foodScore = (mult * minFoodDist)
+
+    #assign score basted on ghost distance (the closer the worse)
+
+    #calculate current disctance from the nearest ghost
+    curGhostDist = []
+    for ghost in currentGhostStates:
+        curGhostDist.append(manhattanDistance(currentPos, ghost.getPosition()))
+    #select the min
+    minDist = float(min(curGhostDist))
+    #if the ghosts are scared in the current position
+    #prefer the closest distance
+    if(sum(ScaredTimes) > 0):
+        #fix multiplier
+        mult = 1.0 / minDist * 100
+        ghostScore = (mult * minDist)
+        #sign is 1 cause we want to add it to the score
+        sign = 1
+    else:
+        #fix multiplier
+        mult = 0.5
+        ghostScore = (mult * minDist)
+        #sign is -1 cause we want to substract it from the score
+        sign = -1
+
+    #calculate pos to nearest pellet
+    if(len(currentPelets) >= 1):
+        curPeletDist = []
+        for pel in currentPelets:
+            curPeletDist.append(manhattanDistance(currentPos, pel))
+        #select the min
+        minPeletDist = float(min(curPeletDist))
+        #multiplier
+        mult = 1.0 / minPeletDist * 100
+        #add score
+        peletScore = (mult * minPeletDist)
+    else:
+        peletScore = 0
+
+    #calculate the total score
+    score = foodScore * 60 / 100 + peletScore * 30 / 100 + sign * ghostScore * 30/ 100
+    return score
 
 # Abbreviation
 better = betterEvaluationFunction
+
