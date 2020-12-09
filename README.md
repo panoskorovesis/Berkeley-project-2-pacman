@@ -1,3 +1,5 @@
+https://img.shields.io/github/license/panoskorovesis/Berkeley-project-2-pacman?style=plastic
+
 # Berkeley's Project 2
 
 ## Description
